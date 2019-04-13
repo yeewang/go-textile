@@ -5,8 +5,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	l "log"
 	"net/http"
+	"os"
 	"regexp"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -38,9 +41,19 @@ type Gateway struct {
 	server *http.Server
 }
 
+type debugLogger struct{}
+
+func (d debugLogger) Write(p []byte) (n int, err error) {
+	s := string(p)
+	if strings.Contains(s, "multiple response.WriteHeader") {
+		debug.PrintStack()
+	}
+	return os.Stderr.Write(p)
+}
+
 // Start creates a gateway server
 func (g *Gateway) Start(addr string) {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	if g.Node != nil {
 		gin.DefaultWriter = g.Node.Writer()
 	}
@@ -78,9 +91,12 @@ func (g *Gateway) Start(addr string) {
 		render404(c)
 	})
 
+	logger := l.New(debugLogger{}, "", 0)
+
 	g.server = &http.Server{
-		Addr:    addr,
-		Handler: router,
+		Addr:     addr,
+		Handler:  router,
+		ErrorLog: logger,
 	}
 
 	errc := make(chan error)

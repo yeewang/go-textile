@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	l "log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -53,7 +54,7 @@ var pbUnmarshaler = jsonpb.Unmarshaler{
 
 // StartApi starts the host instance
 func (t *Textile) StartApi(addr string, serveDocs bool) {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	gin.DefaultWriter = t.writer
 	apiHost = &api{addr: addr, node: t, docs: serveDocs}
 	apiHost.Start()
@@ -285,9 +286,13 @@ func (a *api) Start() {
 			conf.PATCH("", a.patchConfig)
 		}
 	}
+
+	logger := l.New(debugLogger{}, "", 0)
+
 	a.server = &http.Server{
-		Addr:    a.addr,
-		Handler: router,
+		Addr:     a.addr,
+		Handler:  router,
+		ErrorLog: logger,
 	}
 
 	// start listening

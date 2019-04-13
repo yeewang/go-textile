@@ -120,6 +120,7 @@ func InitIpfs(identity native.Identity) (*native.Config, error) {
 				GracePeriod: DefaultConnMgrGracePeriod.String(),
 				Type:        "basic",
 			},
+			DisableBandwidthMetrics: true,
 		},
 		Experimental: native.Experiments{
 			FilestoreEnabled:     false,
