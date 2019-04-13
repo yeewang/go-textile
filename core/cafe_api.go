@@ -2,7 +2,10 @@ package core
 
 import (
 	"context"
+	l "log"
 	"net/http"
+	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -36,7 +39,7 @@ func (t *Textile) CafeApiAddr() string {
 
 // startCafeApi starts the host instance
 func (t *Textile) startCafeApi(addr string) {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	gin.DefaultWriter = t.writer
 	cafeApiHost = &cafeApi{addr: addr, node: t}
 	cafeApiHost.start()
@@ -53,6 +56,16 @@ func (t *Textile) stopCafeApi() error {
 // CafeInfo returns info about this cafe
 func (t *Textile) CafeInfo() *pb.Cafe {
 	return t.cafe.info
+}
+
+type debugLogger struct{}
+
+func (d debugLogger) Write(p []byte) (n int, err error) {
+	s := string(p)
+	if strings.Contains(s, "multiple response.WriteHeader") {
+		debug.PrintStack()
+	}
+	return os.Stderr.Write(p)
 }
 
 // start starts the cafe api
@@ -97,9 +110,12 @@ func (c *cafeApi) start() {
 		inbox.POST("/:pid", c.deliverMessage)
 	}
 
+	logger := l.New(debugLogger{}, "", 0)
+
 	c.server = &http.Server{
-		Addr:    c.addr,
-		Handler: router,
+		Addr:     c.addr,
+		Handler:  router,
+		ErrorLog: logger,
 	}
 
 	// start listening
