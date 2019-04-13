@@ -221,11 +221,23 @@ export class AppStore implements Store {
     const { emitter } = textile.account.sync(true)
     emitter.on('textile.snapshots.found', (item: any) => {
       const opts: NotificationOptions = {
-        body: item.id,
+        body: `Applying snapshot: ${item.id}`,
         timestamp: moment().unix(),
       }
-      const note = new Notification('Found and applying snapshot', opts)
+      const note = new Notification('Syncing', opts)
     })
+    const snapshots: any = await new Promise(resolve => {
+      emitter.on('textile.snapshots.done', (results) => {
+        resolve(results)
+      })
+    })
+    console.log(snapshots)
+    const opts: NotificationOptions = {
+      body: `Found and applied ${(snapshots.items || []).length} snapshots`,
+      timestamp: moment().unix(),
+    }
+    const note = new Notification('Synced', opts)
+    return true
   }
   @action async setProfile(userString?: string, avatarFile?: FormData) {
     if (userString) {

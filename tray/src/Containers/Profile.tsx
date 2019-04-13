@@ -51,11 +51,12 @@ export default class Profile extends ConnectedComponent<RouteComponentProps, Sto
     })
   }
   handleAccountSync = () => {
-    this.stores.store.syncAccount()
-    this.stores.store.fetchProfile()
     this.setState({ isLoading: true })
-    // Show spinner to indicate work is being done
-    setTimeout(() => this.setState({ isLoading: false }), 3000)
+    this.stores.store.syncAccount().then(() => {
+      this.stores.store.fetchProfile().then(() => {
+        this.setState({ isLoading: false })
+      })
+    })
   }
   handleLogout = () => {
     this.props.navigate && this.props.navigate('/landing')

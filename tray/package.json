@@ -9,8 +9,6 @@
   "dependencies": {
     "@reach/router": "^1.2.1",
     "@textile/js-http-client": "^0.2.7",
-    "@types/react-qr-reader": "^2.1.2",
-    "@types/zxcvbn": "^4.4.0",
     "electron": "^4.1.0",
     "electron-is-dev": "^1.0.1",
     "mobx": "^5.9.0",
@@ -48,8 +46,11 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@types/react-qr-reader": "^2.1.2",
+    "@types/zxcvbn": "^4.4.0",
     "@babel/core": "^7.3.4",
     "@craco/craco": "^3.5.0",
+    "@types/axios": "^0.14.0",
     "@types/electron": "^1.6.10",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.13.0",
