@@ -2,6 +2,7 @@ package gateway_test
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/textileio/go-textile/core"
@@ -16,6 +17,39 @@ func TestNewGateway(t *testing.T) {
 func TestGateway_Addr(t *testing.T) {
 	if len(Host.Addr()) == 0 {
 		t.Error("get gateway address failed")
+	}
+}
+
+func TestCorsWrapperSuccess(t *testing.T) {
+	// Prepare the URL
+	addr := "http://" + Host.Addr() + "/health"
+
+	// Make the OPTIONS request, which initialises CORS
+	req, err := http.NewRequest("OPTIONS", addr, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Simulate an external origin
+	req.Header.Add("Origin", "http://example.com/")
+	req.Header.Add("Access-Control-Request-Method", "POST")
+
+	// Send the request
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Close everything
+	defer res.Body.Close()
+
+	// Check its result
+	if res.StatusCode != http.StatusOK {
+		t.Error(fmt.Errorf("%s returned unexpected status: %d", addr, res.StatusCode))
+		return
 	}
 }
 
