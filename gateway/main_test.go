@@ -3,15 +3,39 @@ package gateway_test
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/textileio/go-textile/core"
 	. "github.com/textileio/go-textile/gateway"
+	"github.com/textileio/go-textile/keypair"
 )
 
+var repoPath = "testdata/.textile"
+
 func TestNewGateway(t *testing.T) {
-	Host = &Gateway{}
-	Host.Start(fmt.Sprintf("127.0.0.1:%s", core.GetRandomPort()))
+	os.RemoveAll(repoPath)
+
+	err := core.InitRepo(core.InitConfig{
+		Account:     keypair.Random(),
+		RepoPath:    repoPath,
+		GatewayAddr: fmt.Sprintf("127.0.0.1:%s", core.GetRandomPort()),
+	})
+	if err != nil {
+		t.Errorf("init node failed: %s", err)
+		return
+	}
+
+	node, err := core.NewTextile(core.RunConfig{
+		RepoPath: repoPath,
+	})
+	if err != nil {
+		t.Errorf("create node failed: %s", err)
+		return
+	}
+
+	Host = &Gateway{Node: node}
+	Host.Start(node.Config().Addresses.Gateway)
 }
 
 func TestGateway_Addr(t *testing.T) {
@@ -58,4 +82,5 @@ func TestGateway_Stop(t *testing.T) {
 	if err != nil {
 		t.Errorf("stop gateway failed: %s", err)
 	}
+	os.RemoveAll(repoPath)
 }
