@@ -17,6 +17,7 @@ type Config struct {
 	Account   Account   // local node's account (public info only)
 	Addresses Addresses // local node's addresses
 	API       API       // local node's API settings
+	Gateway   Gateway   // local node's Gateway settings
 	Logs      Logs      // local node's log settings
 	Threads   Threads   // local node's thread settings
 	IsMobile  bool      // local node is setup for mobile
@@ -42,10 +43,18 @@ type SwarmPorts struct {
 	WS  string // WS address port
 }
 
+// HTTPHeaders to customise things like COR
+type HTTPHeaders = map[string][]string
+
 // API settings
 type API struct {
-	HTTPHeaders map[string][]string // HTTP headers to return with the API.
-	SizeLimit   int64               // Maximum file size limit to accept for POST requests in bytes
+	HTTPHeaders HTTPHeaders
+	SizeLimit   int64 // Maximum file size limit to accept for POST requests in bytes
+}
+
+// Gateway settings
+type Gateway struct {
+	HTTPHeaders HTTPHeaders
 }
 
 // Logs settings
@@ -103,7 +112,7 @@ func Init() (*Config, error) {
 			Gateway: "127.0.0.1:5050",
 		},
 		API: API{
-			HTTPHeaders: map[string][]string{
+			HTTPHeaders: HTTPHeaders{
 				"Server": {"go-textile/" + common.Version},
 				"Access-Control-Allow-Methods": {
 					"GET",
@@ -124,6 +133,9 @@ func Init() (*Config, error) {
 				},
 			},
 			SizeLimit: 0,
+		},
+		Gateway: Gateway{
+			HTTPHeaders: HTTPHeaders{},
 		},
 		Logs: Logs{
 			LogToDisk: true,

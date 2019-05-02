@@ -15,14 +15,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	cors "github.com/rs/cors/wrapper/gin"
+	gincors "github.com/rs/cors/wrapper/gin"
 	swagger "github.com/swaggo/gin-swagger"
 	sfiles "github.com/swaggo/gin-swagger/swaggerFiles"
 	"github.com/textileio/go-textile/common"
 	docs "github.com/textileio/go-textile/docs"
 	m "github.com/textileio/go-textile/mill"
 	"github.com/textileio/go-textile/pb"
-	"github.com/textileio/go-textile/repo/config"
 )
 
 // apiVersion is the api version
@@ -90,10 +89,14 @@ func (a *api) Start() {
 	router := gin.Default()
 
 	conf := a.node.Config()
+
 	// middleware setup
-	// CORS
-	router.Use(cors.New(getCORSSettings(conf)))
-	// size limits
+
+	// Add the CORS middleware
+	// Merges the API HTTPHeaders configuration into blank CORS configuration
+	router.Use(gincors.New(ConvertHeadersToCorsOptions(conf.API.HTTPHeaders)))
+
+	// Add size limits
 	if conf.API.SizeLimit > 0 {
 		router.Use(limit.RequestSizeLimiter(conf.API.SizeLimit))
 	}
@@ -445,29 +448,6 @@ func (a *api) getFileConfig(g *gin.Context, mill m.Mill, use string, plaintext b
 
 func (a *api) abort500(g *gin.Context, err error) {
 	g.String(http.StatusInternalServerError, err.Error())
-}
-
-// getCORSSettings returns custom CORS settings given HTTPHeaders config options
-func getCORSSettings(config *config.Config) cors.Options {
-	headers := config.API.HTTPHeaders
-	cconfig := cors.Options{}
-
-	control, ok := headers["Access-Control-Allow-Origin"]
-	if ok && len(control) > 0 {
-		cconfig.AllowedOrigins = control
-	}
-
-	control, ok = headers["Access-Control-Allow-Methods"]
-	if ok && len(control) > 0 {
-		cconfig.AllowedMethods = control
-	}
-
-	control, ok = headers["Access-Control-Allow-Headers"]
-	if ok && len(control) > 0 {
-		cconfig.AllowedHeaders = control
-	}
-
-	return cconfig
 }
 
 // pbJSON responds with a JSON rendered protobuf message

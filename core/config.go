@@ -10,6 +10,7 @@ import (
 
 	"github.com/ipfs/go-ipfs/repo"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
+	cors "github.com/rs/cors"
 	"github.com/textileio/go-textile/repo/config"
 )
 
@@ -197,4 +198,26 @@ func applyServerConfigOption(rep repo.Repo, isServer bool) error {
 	}
 
 	return nil
+}
+
+// ConvertHeadersToCorsOptions converts http headers into the format that cors options accepts
+func ConvertHeadersToCorsOptions(headers config.HTTPHeaders) cors.Options {
+	options := cors.Options{}
+
+	control, ok := headers["Access-Control-Allow-Origin"]
+	if ok && len(control) > 0 {
+		options.AllowedOrigins = control
+	}
+
+	control, ok = headers["Access-Control-Allow-Methods"]
+	if ok && len(control) > 0 {
+		options.AllowedMethods = control
+	}
+
+	control, ok = headers["Access-Control-Allow-Headers"]
+	if ok && len(control) > 0 {
+		options.AllowedHeaders = control
+	}
+
+	return options
 }

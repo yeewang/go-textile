@@ -18,7 +18,7 @@ import (
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	peer "github.com/libp2p/go-libp2p-peer"
 	"github.com/mr-tron/base58/base58"
-	cors "github.com/rs/cors/wrapper/gin"
+	gincors "github.com/rs/cors/wrapper/gin"
 	"github.com/textileio/go-textile/core"
 	"github.com/textileio/go-textile/crypto"
 	"github.com/textileio/go-textile/gateway/static/css"
@@ -47,10 +47,13 @@ func (g *Gateway) Start(addr string) {
 
 	router := gin.Default()
 
-	// Enable cors with the default options (allow all for all domains) for our gin server
+	conf := g.Node.Config()
+
+	// Add the CORS middleware
+	// Merges the API HTTPHeaders configuration into the default CORS configuration
 	// https://github.com/rs/cors/#parameters
 	// https://github.com/rs/cors/blob/76f58f330d76a55c5badc74f6212e8a15e742c77/examples/gin/server.go
-	router.Use(cors.Default())
+	router.Use(gincors.New(core.ConvertHeadersToCorsOptions(conf.API.HTTPHeaders)))
 
 	router.SetHTMLTemplate(parseTemplates())
 
