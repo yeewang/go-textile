@@ -13,7 +13,7 @@ import (
 
 var repoPath = "testdata/.textile"
 
-func TestNewGateway(t *testing.T) {
+func TestGateway_Creation(t *testing.T) {
 	os.RemoveAll(repoPath)
 
 	err := core.InitRepo(core.InitConfig{
@@ -44,7 +44,7 @@ func TestGateway_Addr(t *testing.T) {
 	}
 }
 
-func TestCorsWrapperSuccess(t *testing.T) {
+func TestGateway_Cors(t *testing.T) {
 	// Prepare the URL
 	addr := "http://" + Host.Addr() + "/health"
 

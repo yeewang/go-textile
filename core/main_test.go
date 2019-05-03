@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"testing"
 
@@ -54,6 +55,7 @@ func TestInitRepo(t *testing.T) {
 	if err := InitRepo(InitConfig{
 		Account:  accnt,
 		RepoPath: repoPath,
+		ApiAddr: fmt.Sprintf("127.0.0.1:%s", GetRandomPort()),
 	}); err != nil {
 		t.Errorf("init node failed: %s", err)
 	}
@@ -86,10 +88,20 @@ func TestTextile_Start(t *testing.T) {
 	<-node.OnlineCh()
 }
 
-/*
-func TestTextile_Cors(t *testing.T) {
+func TestTextile_API_Start(t *testing.T) {
+	node.StartApi(node.Config().Addresses.API, false)
+}
+
+func TestTextile_API_Cors(t *testing.T) {
+	// Hostname
+	hostname := node.ApiAddr()
+	if len(hostname) == 0 {
+		t.Error("The API address was empty")
+		return
+	}
+
 	// Prepare the URL
-	addr := "http://" + node.ApiAddr() + "/health"
+	addr := "http://" + hostname + "/health"
 
 	// Make the OPTIONS request, which initialises CORS
 	req, err := http.NewRequest("OPTIONS", addr, nil)
@@ -119,7 +131,12 @@ func TestTextile_Cors(t *testing.T) {
 		return
 	}
 }
-*/
+
+func TestTextile_API_Stop(t *testing.T) {
+	if err := node.StopApi(); err != nil {
+		t.Errorf("stop api failed: %s", err)
+	}
+}
 
 func TestTextile_CafeSetup(t *testing.T) {
 	// start another
