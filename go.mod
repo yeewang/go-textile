@@ -1,4 +1,4 @@
-module github.com/textileio/go-textile
+module github.com/yeewang/go-textile
 
 go 1.12
 
@@ -55,6 +55,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/gin-swagger v1.1.0
 	github.com/swaggo/swag v1.5.0
+	github.com/textileio/go-textile v0.0.0-00010101000000-000000000000 // indirect
 	github.com/tyler-smith/go-bip39 v0.0.0-20181017060643-dbb3b84ba2ef
 	github.com/whyrusleeping/go-logging v0.0.0-20170515211332-0457bb6b88fc
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
@@ -64,3 +65,5 @@ require (
 	golang.org/x/image v0.0.0-20190321063152-3fc05d484e9f // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0-20170531160350-a96e63847dc3
 )
+
+replace github.com/textileio/go-textile => ./
