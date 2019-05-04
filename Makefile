@@ -1,3 +1,5 @@
+export GO111MODULE=on
+
 setup:
 	go mod download
 	go get github.com/ahmetb/govvv
